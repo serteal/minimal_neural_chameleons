@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import torch
 
 
@@ -101,24 +99,3 @@ class LogisticProbe:
         scores = self.forward(reps, mask)
         # Return scalar for single example, tensor for batch
         return scores.item() if scores.shape[0] == 1 else scores
-
-
-# Convenience function to load all probes
-def load_all_probes(probes_dir, device="cuda", dtype=torch.bfloat16):
-    """Load all probes from weights files."""
-    probes_dir = Path(probes_dir)
-
-    probes = {}
-    probe_files = {
-        "mathematical": "mathematical_weights.pt",
-        "german": "german_weights.pt",
-        "harmful": "harmful_weights.pt",
-        "deception": "deception_weights.pt",
-    }
-
-    for name, filename in probe_files.items():
-        probe_path = probes_dir / filename
-        if probe_path.exists():
-            probes[name] = LogisticProbe.load(probe_path, device=device, dtype=dtype)
-
-    return probes
