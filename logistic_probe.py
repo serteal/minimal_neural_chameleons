@@ -25,10 +25,26 @@ class LogisticProbe:
         self.dtype = dtype
         self.layers = {}
 
-        # Convert numpy arrays to tensors and move to device
+        # Convert numpy arrays or tensors to tensors and move to device
         for layer_idx, params in weights_dict.items():
-            weight = torch.from_numpy(params["weight"]).to(device=device, dtype=dtype)
-            bias = torch.from_numpy(params["bias"]).to(device=device, dtype=dtype)
+            # Convert layer_idx to int if it's a string (e.g., "layer_0" -> 0)
+            if isinstance(layer_idx, str):
+                if layer_idx.startswith("layer_"):
+                    layer_idx = int(layer_idx.split("_")[1])
+                else:
+                    layer_idx = int(layer_idx)
+
+            # Handle both numpy arrays and tensors
+            if isinstance(params["weight"], torch.Tensor):
+                weight = params["weight"].to(device=device, dtype=dtype)
+            else:
+                weight = torch.from_numpy(params["weight"]).to(device=device, dtype=dtype)
+
+            if isinstance(params["bias"], torch.Tensor):
+                bias = params["bias"].to(device=device, dtype=dtype)
+            else:
+                bias = torch.from_numpy(params["bias"]).to(device=device, dtype=dtype)
+
             self.layers[layer_idx] = {"weight": weight, "bias": bias}
 
     @classmethod
